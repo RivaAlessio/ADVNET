@@ -1,0 +1,35 @@
+OrdererOrgs:
+  - Name: orderer
+    Domain: advnet.com
+    EnableNodeOUs: true
+    Specs:
+      - Hostname: orderer
+        SANS:
+          - "localhost"
+          - "127.0.0.1"
+          - "0.0.0.0"
+
+PeerOrgs:
+  - Name: adv0
+    Domain: adv0.advnet.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+      SANS:
+        - "localhost"
+        - "127.0.0.1"
+        - "0.0.0.0"
+    Users:
+      Count: 1
+
+  - Name: pub0
+    Domain: pub0.advnet.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+      SANS:
+        - "localhost"
+        - "127.0.0.1"
+        - "0.0.0.0"
+    Users:
+      Count: 1

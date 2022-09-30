@@ -1,0 +1,9 @@
+# github.com/bwesterb/go-ristretto v1.2.1
+## explicit; go 1.13
+github.com/bwesterb/go-ristretto
+github.com/bwesterb/go-ristretto/edwards25519
+# github.com/tuhoag/elliptic-curve-cryptography-go v0.0.4
+## explicit; go 1.13
+github.com/tuhoag/elliptic-curve-cryptography-go/elgamal
+github.com/tuhoag/elliptic-curve-cryptography-go/pedersen
+github.com/tuhoag/elliptic-curve-cryptography-go/utils

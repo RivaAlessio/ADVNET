@@ -1,0 +1,35 @@
+---
+name: test
+version: 1.0.0
+client:
+  organization: ${ORG}
+  connection:
+    timeout:
+      peer:
+        endorser: '300'
+organizations:
+  ${ORG}:
+    mspid: ${ORG}MSP
+    peers:
+    - peer0.${ORG}.advnet.com
+    certificateAuthorities:
+    - ca.${ORG}.advnet.com
+peers:
+  peer0.${ORG}.advnet.com:
+    url: grpcs://localhost:${PEER0_PORT}
+    tlsCACerts:
+      pem: |
+          ${PEERPEM}
+    grpcOptions:
+      ssl-target-name-override: peer0.${ORG}.advnet.com
+      hostnameOverride: peer0.${ORG}.advnet.com
+certificateAuthorities:
+  ca.${ORG}.advnet.com:
+    url: https://localhost:${CAPORT}
+    caName: ca-${ORG}
+    tlsCACerts:
+      pem: 
+        - |
+          ${CAPEM}
+    httpOptions:
+      verify: false

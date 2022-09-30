@@ -1,0 +1,90 @@
+name: Fabric test
+version: "1.0"
+
+caliper:
+  blockchain: fabric
+  #sutOptions:
+    #mutualTls: false
+
+channels:
+  mychannel:
+    contracts:
+    - id: main
+      language: golang
+      version: "1.0"
+    created: true
+    orderers:
+    - orderer.advnet.com
+    peers:
+      peer0.adv0.advnet.com:
+        chaincodeQuery: true
+        endorsingPeer:  true
+        eventSource:    true
+        ledgerQuery:    true
+      peer0.pub0.advnet.com:
+        chaincodeQuery: true
+        endorsingPeer:  true
+        eventSource:    true
+        ledgerQuery:    true
+orderers:
+    orderer.advnet.com:
+        url: grpcs://0.0.0.0:7050
+        grpcOptions:
+            ssl-target-name-override: orderer.advnet.com
+        tlsCACerts:
+            path: ../organizations/ordererOrganizations/advnet.com/orderers/orderer.advnet.com/msp/tlscacerts/tlsca.advnet.com-cert.pem
+clients:
+    peer0.adv0.advnet.com:
+      client:
+          clientPrivateKey:
+              path: ../organizations/peerOrganizations/adv0.advnet.com/users/Admin@adv0.advnet.com/msp/keystore/priv_sk
+          clientSignedCert:
+              path: ../organizations/peerOrganizations/adv0.advnet.com/users/Admin@adv0.advnet.com/msp/signcerts/Admin@adv0.advnet.com-cert.pem
+          credentialStore:
+              cryptoStore:
+                  path: ../organizations/peerOrganizations/adv0.advnet.com/users/Admin@adv0.advnet.com/msp
+              path: ../organizations/peerOrganizations/adv0.advnet.com/users/Admin@adv0.advnet.com/msp/admincerts
+          organization: adv0
+    peer0.pub0.advnet.com:
+      client:
+          clientPrivateKey:
+              path: ../organizations/peerOrganizations/pub0.advnet.com/users/Admin@pub0.advnet.com/msp/keystore/priv_sk
+          clientSignedCert:
+              path: ../organizations/peerOrganizations/pub0.advnet.com/users/Admin@pub0.advnet.com/msp/signcerts/Admin@pub0.advnet.com-cert.pem
+          credentialStore:
+              cryptoStore:
+                  path: ../organizations/peerOrganizations/pub0.advnet.com/users/Admin@pub0.advnet.com/msp
+              path: ../organizations/peerOrganizations/pub0.advnet.com/users/Admin@pub0.advnet.com/msp/admincerts
+          organization: pub0
+organizations:
+  adv0:
+      adminPrivateKey:
+          path: ../organizations/peerOrganizations/adv0.advnet.com/users/Admin@adv0.advnet.com/msp/keystore/priv_sk
+      mspid: adv0MSP
+      peers:
+        - peer0.adv0.advnet.com
+      signedCert:
+          path: ../organizations/peerOrganizations/adv0.advnet.com/users/Admin@adv0.advnet.com/msp/signcerts/Admin@adv0.advnet.com-cert.pem
+
+  pub0:
+      adminPrivateKey:
+          path: ../organizations/peerOrganizations/pub0.advnet.com/users/Admin@pub0.advnet.com/msp/keystore/priv_sk
+      mspid: pub0MSP
+      peers:
+        - peer0.pub0.advnet.com
+      signedCert:
+          path: ../organizations/peerOrganizations/pub0.advnet.com/users/Admin@pub0.advnet.com/msp/signcerts/Admin@pub0.advnet.com-cert.pem
+
+peers:
+    peer0.adv0.advnet.com:
+        grpcOptions:
+            ssl-target-name-override: peer0.adv0.advnet.com
+        tlsCACerts:
+            path: ../organizations/peerOrganizations/adv0.advnet.com/tlsca/tlsca.adv0.advnet.com-cert.pem
+        url: grpcs://0.0.0.0:1050
+    peer0.pub0.advnet.com:
+        grpcOptions:
+            ssl-target-name-override: peer0.pub0.advnet.com
+        tlsCACerts:
+            path: ../organizations/peerOrganizations/pub0.advnet.com/tlsca/tlsca.pub0.advnet.com-cert.pem
+        url: grpcs://0.0.0.0:2050

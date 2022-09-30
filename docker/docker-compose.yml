@@ -1,0 +1,155 @@
+version: '2'
+
+networks:
+    test:
+
+services:
+    cli:
+        container_name: cli
+        image: hyperledger/fabric-tools:$IMAGE_TAG
+        tty: true
+        stdin_open: true
+        networks:
+            - test
+        depends_on:
+            - peer0.adv0.advnet.com
+            - peer0.pub0.advnet.com
+        environment:
+            - GOPATH=/opt/gopath
+            - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+            - FABRIC_LOGGING_SPEC=${FABRIC_LOG}
+        working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+        command: /bin/bash
+
+    verifier.adv.com:
+        container_name: verifier.adv.com
+        build: ./verifier
+        ports:
+            - 9010:9000
+        networks:
+            - test
+        environment:
+        - TESTING=TRUE
+        - SECRET=R9oNT1Lg5e3ntdAYvEl0BfHaM4ys0Qwuy/IoEfG05Ag=
+        - SECRETKEY=DYMm0G2G3zc25FM6Xxuk07jtd9V3TeV0DE8rYHlgdQU=
+
+    verifier.pub.com:
+        container_name: verifier.pub.com
+        build: ./verifier
+        ports:
+            - 9000:9000
+        networks:
+            - test
+        environment:
+        - TESTING=TRUE
+        - SECRET=aoAB2yaCuP2aUg9XXsYNB7FQxFPnglwvfJjx/TLJwgY=
+        - SECRETKEY=OR3fLzrrKRmtioBYkEkA1j38L6oinRK4/jROmuwkpAQ=
+
+    orderer.advnet.com:
+        container_name: orderer.advnet.com
+        extends:
+            file: docker-compose-base.yml
+            service: orderer-base
+        ports:
+            - 7050:7050
+        networks:
+            - test
+        environment:
+            - CORE_OPERATIONS_LISTENADDRESS=orderer.${PROJECT_NAME}.com:9443
+        volumes:
+            - ../channels/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+            - ../organizations/ordererOrganizations/${PROJECT_NAME}.com/orderers/orderer.${PROJECT_NAME}.com/msp:/var/hyperledger/orderer/msp
+            - ../organizations/ordererOrganizations/${PROJECT_NAME}.com/orderers/orderer.${PROJECT_NAME}.com/tls/:/var/hyperledger/orderer/tls
+
+    couchdb0.adv0.advnet.com:
+        container_name: couchdb0.adv0.advnet.com
+        image: couchdb:3.2.1
+        environment:
+            - COUCHDB_USER=admin
+            - COUCHDB_PASSWORD=adminpw
+        ports:
+            - 5901:5984
+        networks:
+            - test
+
+    couchdb0.pub0.advnet.com:
+        container_name: couchdb0.pub0.advnet.com8
+        image: couchdb:3.2.1
+        environment:
+            - COUCHDB_USER=admin
+            - COUCHDB_PASSWORD=adminpw
+        ports:
+            - 5902:5984
+        networks:
+            - test
+
+    peer0.adv0.advnet.com:
+        container_name: peer0.adv0.advnet.com
+        extends:
+            file: docker-compose-base.yml
+            service: peer-base
+        ports:
+            - 1050:7051
+        networks:
+            - test
+        depends_on:
+            - orderer.${COMPOSE_PROJECT_NAME}.com
+            - couchdb0.adv0.advnet.com
+            #- verifier.adv.com
+            #- verifier.pub.com
+        environment:
+            - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+            - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0.adv0.advnet.com:5984
+            - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
+            - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
+
+            - CORE_PEER_ID=peer0.adv0.${COMPOSE_PROJECT_NAME}.com
+            - CORE_PEER_ADDRESS=peer0.adv0.${COMPOSE_PROJECT_NAME}.com:7051
+            - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+            - CORE_PEER_CHAINCODEADDRESS=peer0.adv0.${COMPOSE_PROJECT_NAME}.com:7052
+            - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+            - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.adv0.${COMPOSE_PROJECT_NAME}.com:7051
+            - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.adv0.${COMPOSE_PROJECT_NAME}.com:7051
+            - CORE_PEER_LOCALMSPID=adv0MSP
+
+        volumes:
+            - /var/run/docker.sock:/host/var/run/docker.sock
+            - ../organizations/peerOrganizations/adv0.${PROJECT_NAME}.com/peers/peer0.adv0.${PROJECT_NAME}.com/msp:/etc/hyperledger/fabric/msp
+            - ../organizations/peerOrganizations/adv0.${PROJECT_NAME}.com/peers/peer0.adv0.${PROJECT_NAME}.com/tls:/etc/hyperledger/fabric/tls
+            # - peer0.adv0.${PROJECT_NAME}.com:/var/hyperledger/production
+
+    peer0.pub0.advnet.com:
+        container_name: peer0.pub0.advnet.com
+        extends:
+            file: docker-compose-base.yml
+            service: peer-base
+        ports:
+            - 2050:7051
+        networks:
+            - test
+        depends_on:
+            - orderer.${COMPOSE_PROJECT_NAME}.com
+            - couchdb0.pub0.advnet.com
+            #- verifier.adv.com
+            #- verifier.pub.com
+        environment:
+            - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+            - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0.pub0.advnet.com:5984
+            - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
+            - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
+
+            - CORE_PEER_ID=peer0.pub0.${PROJECT_NAME}.com
+            - CORE_PEER_ADDRESS=peer0.pub0.${PROJECT_NAME}.com:7051
+            - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+            - CORE_PEER_CHAINCODEADDRESS=peer0.pub0.${PROJECT_NAME}.com:7052
+            - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+            - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.pub0.${PROJECT_NAME}.com:7051
+            - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.pub0.${PROJECT_NAME}.com:7051
+            - CORE_PEER_LOCALMSPID=pub0MSP
+        volumes:
+            - /var/run/docker.sock:/host/var/run/docker.sock
+            - ../organizations/peerOrganizations/pub0.${PROJECT_NAME}.com/peers/peer0.pub0.${PROJECT_NAME}.com/msp:/etc/hyperledger/fabric/msp
+            - ../organizations/peerOrganizations/pub0.${PROJECT_NAME}.com/peers/peer0.pub0.${PROJECT_NAME}.com/tls:/etc/hyperledger/fabric/tls
+            # - peer0.pub0.${PROJECT_NAME}.com:/var/hyperledger/production
+            # - ../volumes/peer0.pub0.${PROJECT_NAME}.com:/var/hyperledger/production
+

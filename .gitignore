@@ -1,0 +1,8 @@
+/organizations/*
+/caliper/node_modules/*
+caliper/caliper.log
+caliper/benchmarks/workload/template.js
+chaincode/main.tar.gz
+caliper/report.html
+/smartcontract
+/TpocJson

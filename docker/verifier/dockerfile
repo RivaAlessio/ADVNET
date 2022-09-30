@@ -1,0 +1,14 @@
+FROM golang:latest
+
+
+WORKDIR /app
+COPY go.mod ./
+#RUN go mod dowload
+COPY *.go ./
+RUN go mod tidy
+RUN go mod vendor
+RUN go build -o /verifier-server-test
+
+EXPOSE 8000
+
+CMD ["/verifier-server-test"]

@@ -1,0 +1,161 @@
+Organizations:
+  - &OrdererOrg
+    Name: ordererMSP
+    ID: ordererMSP
+    MSPDir: ../organizations/ordererOrganizations/advnet.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('ordererMSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('ordererMSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('ordererMSP.admin')"
+
+
+  - &Pub0
+    Name: pub0MSP
+    ID: pub0MSP
+    MSPDir: ../organizations/peerOrganizations/pub0.advnet.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('pub0MSP.admin', 'pub0MSP.peer', 'pub0MSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('pub0MSP.admin', 'pub0MSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('pub0MSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('pub0MSP.peer')"
+    OrdererEndpoints:
+      - orderer.advnet.com:7050
+
+  - &Adv0
+    Name: adv0MSP
+    ID: adv0MSP
+    MSPDir: ../organizations/peerOrganizations/adv0.advnet.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('adv0MSP.admin', 'adv0MSP.peer', 'adv0MSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('adv0MSP.admin', 'adv0MSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('adv0MSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('adv0MSP.peer')"
+    OrdererEndpoints:
+      - orderer.advnet.com:7050
+
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_0: true
+  Orderer: &OrdererCapabilities
+    V2_0: true
+  Application: &ApplicationCapabilities
+    V2_0: true
+
+Application: &ApplicationDefaults
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+  OrdererType: etcdraft
+  Addresses:
+    - orderer.advnet.com:7050
+
+  EtcdRaft:
+    Consenters:
+      - Host: orderer.advnet.com
+        Port: 7050
+        ClientTLSCert: ../organizations/ordererOrganizations/advnet.com/orderers/orderer.advnet.com/tls/server.crt
+        ServerTLSCert: ../organizations/ordererOrganizations/advnet.com/orderers/orderer.advnet.com/tls/server.crt
+
+  BatchTimeout: 2s
+  BatchSize:
+    MaxMessageCount: 10
+    AbsoluteMaxBytes: 99 MB
+    PreferredMaxBytes: 512 KB
+
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+
+Channel: &ChannelDefaults
+  Policies:
+    # Who may invoke the 'Deliver' API
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    # Who may invoke the 'Broadcast' API
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    # Who may modify elements at this config level
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities:
+    <<: *ChannelCapabilities
+
+Profiles:
+  TwoOrgsOrdererGenesis:
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererOrg
+      Capabilities:
+        <<: *OrdererCapabilities
+    Consortiums:
+      SampleConsortium:
+        Organizations:
+          - *Pub0
+          - *Adv0
+
+  TwoOrgsChannel:
+    Consortium: SampleConsortium
+    <<: *ChannelDefaults
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *Pub0
+        - *Adv0
+      Capabilities:
+        <<: *ApplicationCapabilities
