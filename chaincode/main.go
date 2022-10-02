@@ -419,115 +419,7 @@ func (s *SmartContract) ClaimReward(ctx contractapi.TransactionContextInterface,
 	return &reward, nil
 }
 
-func (s *SmartContract) TestingProtocol(ctx contractapi.TransactionContextInterface, campaignID string, userID string, tpoc string, timestamp string) (*Reward, error) {
 
-	//## Check if campaign exist and retrieve information ##
-	fmt.Println("inside claim reward")
-	campaignBytes, err := ctx.GetStub().GetState(campaignID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get campaign %s: %v", campaignID, err)
-	}
-	if campaignBytes == nil {
-		return nil, fmt.Errorf("campaign %s does not exist", campaignID)
-	}
-	fmt.Println("before unmarshal")
-	var campaign Campaign
-	err = json.Unmarshal(campaignBytes, &campaign)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println("after unmarshal")
-	//## Check if user already rewarded ##
-	addresses := strings.Split(campaign.Verifier, ",")
-	str := campaignID + userID
-	data := []byte(str)
-	hash := sha256.Sum256(data)
-	h_ID := fmt.Sprintf("%x", hash[:])
-	RewardBytes, err := ctx.GetStub().GetState(h_ID)
-	if err != nil {
-		return nil, fmt.Errorf("error :%s", err)
-	}
-	if RewardBytes != nil {
-		return nil, fmt.Errorf("reward %s already exist", h_ID)
-	}
-	//## Verify TPoC ##
-	//## If verified TPoC time is between starting and ending date of campaign c --> sum duration ##
-
-	var duration float64
-	duration = 0
-
-	startDate, err := time.Parse("2006-01-02T15:04:05", campaign.StartingDate)
-	if err != nil {
-		return nil, err
-	}
-	endDate, err := time.Parse("2006-01-02T15:04:05", campaign.EndingDate)
-	if err != nil {
-		return nil, err
-	}
-
-	tokenBytes, err := ctx.GetStub().GetState(tpoc)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to get TPoC %s: %v", tpoc, err)
-	}
-	if tokenBytes == nil {
-		return nil, fmt.Errorf("TPoC %s does not exist", tpoc)
-	}
-
-	var token TokenCollection
-	err = json.Unmarshal(tokenBytes, &token)
-	if err != nil {
-		return nil, err
-	}
-	//test, _ := time.Parse("2006-01-02T15:04:05", string)
-
-	collectDate, err := time.Parse("2006-01-02T15:04:05", token.Timestamp)
-	if err != nil {
-		return nil, err
-	}
-	if collectDate.Before(endDate) && collectDate.After(startDate) && token.ID_Campaign == campaignID {
-
-		verifiedTPoC_u := verifyTpoc(token.TPoC_User, addresses)
-		verifiedTPoC_d := verifyTpoc(token.TPoC_Device, addresses)
-
-		if verifiedTPoC_u == verifiedTPoC_d {
-			time, err := strconv.ParseFloat(token.Duration, 64)
-			if err != nil {
-				return nil, err
-			}
-			duration = duration + time
-			fmt.Println("duration-->", duration)
-		}
-	}
-	//## Retrieve Score & Calculate Reward ##
-	rewardVal, err := strconv.ParseFloat(campaign.RewardValue, 64)
-	if err != nil {
-		return nil, err
-	}
-	score := ConcaveScore(duration)
-	fmt.Println("score-->", score)
-	rewardAmount := rewardVal * score
-	fmt.Println("reward-->", rewardAmount)
-	sReward := fmt.Sprintf("%f", rewardAmount)
-
-	//## Store transaction to state reward of user ##
-	reward := Reward{
-		ID_User:       h_ID,
-		ID_Campaign:   campaignID,
-		Reward_Amount: sReward,
-		DocType:       "reward",
-		Timestamp:     timestamp,
-	}
-	rewardJSON, err := json.Marshal(reward)
-	if err != nil {
-		return nil, err
-	}
-	err = ctx.GetStub().PutState(h_ID, rewardJSON)
-	if err != nil {
-		return nil, err
-	}
-	return &reward, nil
-}
 func (s *SmartContract) DeleteReward(ctx contractapi.TransactionContextInterface, campaignID string, userID string) error {
 
 	str := campaignID + userID
@@ -769,39 +661,7 @@ func generateCommitment(H *ristretto.Point, s *ristretto.Scalar) (*ristretto.Poi
 	c := pedersen.CommitTo(H, &r, s)
 	return c, &r
 }
-func (s *SmartContract) PartialClaim(ctx contractapi.TransactionContextInterface, campaignID string, userID string) error {
-	//## Check if campaign exist ##
-	fmt.Println("inside claim reward")
-	campaignBytes, err := ctx.GetStub().GetState(campaignID)
-	if err != nil {
-		return fmt.Errorf("failed to get campaign %s: %v", campaignID, err)
-	}
-	if campaignBytes == nil {
-		return fmt.Errorf("campaign %s does not exist", campaignID)
-	}
-	fmt.Println("before unmarshal")
-	var campaign Campaign
-	err = json.Unmarshal(campaignBytes, &campaign)
-	if err != nil {
-		return err
-	}
-	fmt.Println("after unmarshal")
-	//## Check if user already rewarded for campaign c ##
 
-	str := campaignID + userID
-	data := []byte(str)
-	hash := sha256.Sum256(data)
-	h_ID := fmt.Sprintf("%x", hash[:])
-	RewardBytes, err := ctx.GetStub().GetState(h_ID)
-	if err != nil {
-		return fmt.Errorf("error :%s", err)
-	}
-	if RewardBytes != nil {
-		return fmt.Errorf("reward %s already exist", h_ID)
-	}
-	fmt.Println("no reward obtained", h_ID)
-	return nil
-}
 
 //##################################################################################################################################################################################################################################
 func main() {
