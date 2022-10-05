@@ -103,16 +103,12 @@ func processRequest(connection net.Conn) {
 
 		fmt.Println("decrypting")
 		fmt.Println(req[1])
-		// bufferz := make([]byte, 2024)
-		// mLeng, err := connection.Read(bufferz)
-		// if err != nil {
-		// 	fmt.Println("Error reading:", err.Error())
-		// }
-		// fmt.Println("read buffer")
-		// str := string(bufferz[:mLeng])
-		// fmt.Println(str)
+
 		response := "RESPONSE"
+		//retrieve all partial TPOC
 		reqs := strings.Split(req[1], "TPOC")
+		//for each TPOC decrypt commit and r value
+		//send back commit decrypted and commit over r value
 		for i := 0; i < len(reqs)-1; i++ {
 			reqDec := strings.Split(reqs[i], "KEY")
 			key, _ := utils.ConvertStringToPoint(reqDec[1])

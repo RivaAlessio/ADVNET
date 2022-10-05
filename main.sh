@@ -64,10 +64,6 @@ function queryChaincode() {
 	fcnCall='{"function":"'ReadCampaign'","Args":["'001'"]}'
     $SCRIPTS_DIR/chaincodeQuery.sh $CHAINCODE_NAME $CHANNEL_NAME "adv" 1 1 $fcnCall
 	
-	
-	#sleep 2
-	#fcnCall='{"function":"'TestCommit'","Args":[]}'
-    #$SCRIPTS_DIR/chaincodeQuery.sh $CHAINCODE_NAME $CHANNEL_NAME "adv" 1 1 $fcnCall
 }
 function proof(){
 	fcnCall='{"function":"'GenerateProof'","Args":["'001'"]}'

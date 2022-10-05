@@ -15,7 +15,6 @@ import (
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	elgamal "github.com/tuhoag/elliptic-curve-cryptography-go/elgamal"
-	pedersen "github.com/tuhoag/elliptic-curve-cryptography-go/pedersen"
 	"github.com/tuhoag/elliptic-curve-cryptography-go/utils"
 )
 
@@ -77,7 +76,6 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 		{ID_Campaign: "001", ID_Advertiser: "adv1", ID_Publisher: "pub1", DocType: "campaign", Verifier: "verifier.adv.com:9000,verifier.pub.com:9000", RewardValue: "0.5", StartingDate: "2022-05-01T00:00:01", EndingDate: "2022-09-01T23:59:59"},
 		{ID_Campaign: "002", ID_Advertiser: "adv2", ID_Publisher: "pub2", DocType: "campaign", Verifier: "verifier.adv.com:9000,verifier.pub.com:9000", RewardValue: "0.8", StartingDate: "2022-07-01T00:00:01", EndingDate: "2022-12-01T23:59:59"},
 	}
-	//fmt.Println(assets)
 	for _, campaign := range campaigns {
 		assetJSON, err := json.Marshal(campaign)
 		if err != nil {
@@ -234,7 +232,7 @@ func (s *SmartContract) GeneratePoCandTPoC(ctx contractapi.TransactionContextInt
 	for i := 0; i < ntpoc; i++ {
 		secretK.Rand()
 		tpocs[i] = generateTpoc(commit, rands, len(proof.Keys), &secretK, proof.Keys)
-		fmt.Println("TPOC:-->", tpocs[i])
+		//fmt.Println("TPOC:-->", tpocs[i])
 	}
 	var poctpoc PoCTPoC
 	poctpoc.Proof = *proof
@@ -325,10 +323,19 @@ func (s *SmartContract) ClaimReward(ctx contractapi.TransactionContextInterface,
 		return nil, err
 	}
 
-	//## Check if user already rewarded ##
-
 	addresses := strings.Split(campaign.Verifier, ",")
 	nVerifier := len(addresses)
+
+	startDate, err := time.Parse("2006-01-02T15:04:05", campaign.StartingDate)
+	if err != nil {
+		return nil, err
+	}
+	endDate, err := time.Parse("2006-01-02T15:04:05", campaign.EndingDate)
+	if err != nil {
+		return nil, err
+	}
+
+	//## Check if user already rewarded ##
 
 	str := campaignID + userID
 	data := []byte(str)
@@ -341,27 +348,19 @@ func (s *SmartContract) ClaimReward(ctx contractapi.TransactionContextInterface,
 	if RewardBytes != nil {
 		return nil, fmt.Errorf("reward %s already exist", h_ID)
 	}
+
 	//## Verify TPoC ##
-	//## If verified TPoC time is between starting and ending date of campaign c --> sum duration ##
 
 	var duration float64
 	duration = 0
 
-	startDate, err := time.Parse("2006-01-02T15:04:05", campaign.StartingDate)
-	if err != nil {
-		return nil, err
-	}
-	endDate, err := time.Parse("2006-01-02T15:04:05", campaign.EndingDate)
-	if err != nil {
-		return nil, err
-	}
-
 	tpocSplt := strings.Split(Tpocs, "RWRD")
 	//tokens:=make([]TokenCollection,len(tpocSplt))
+
 	var tokens []TokenCollection
 	var retrievedTpocU []string
 	var retrievedTpocD []string
-	fmt.Println("nTPOC", len(tpocSplt))
+
 	for _, tpoc := range tpocSplt {
 
 		tokenBytes, err := ctx.GetStub().GetState(tpoc)
@@ -379,48 +378,38 @@ func (s *SmartContract) ClaimReward(ctx contractapi.TransactionContextInterface,
 		if err != nil {
 			return nil, err
 		}
-		//test, _ := time.Parse("2006-01-02T15:04:05", string)
 
 		collectDate, err := time.Parse("2006-01-02T15:04:05", token.Timestamp)
 		if err != nil {
 			continue
 		}
+		//## check if token was collected between start date and end date of campign ##
 		if collectDate.Before(endDate) && collectDate.After(startDate) && token.ID_Campaign == campaignID {
 			tokens = append(tokens, token)
 			retrievedTpocU = append(retrievedTpocU, token.TPoC_User)
 			retrievedTpocD = append(retrievedTpocD, token.TPoC_Device)
 		}
-		// 	verifiedTPoC_u := verifyTpoc(token.TPoC_User, addresses)
-		// 	verifiedTPoC_d := verifyTpoc(token.TPoC_Device, addresses)
-
-		// 	if verifiedTPoC_u == verifiedTPoC_d {
-		// 		time, err := strconv.ParseFloat(token.Duration, 64)
-		// 		if err != nil {
-		// 			continue
-		// 		}
-		// 		duration = duration + time
-		// 	}
-		// }
 
 	}
-	fmt.Println("nTokens", len(tokens))
-	fmt.Println("nTPOCU", len(retrievedTpocU))
-	fmt.Println("nTPOCD", len(retrievedTpocD))
+	//fmt.Println("nTokens", len(tokens))
+	//fmt.Println("nTPOCU", len(retrievedTpocU))
+	//fmt.Println("nTPOCD", len(retrievedTpocD))
 
 	if len(tokens) == 0 {
 		return nil, fmt.Errorf("zero tokens")
 	}
-
+	//generate request (partial TPOC) to send to each verifier
 	requestU := generateRequests(retrievedTpocU, nVerifier)
 	requestD := generateRequests(retrievedTpocD, nVerifier)
 	decryptedU := make([]decryptResponse, nVerifier)
 	decryptedD := make([]decryptResponse, nVerifier)
-
+	//send partial TPOc for decryption
 	for i := 0; i < nVerifier; i++ {
 		decryptedU[i] = decryptRequest(addresses[i], requestU[i])
 		decryptedD[i] = decryptRequest(addresses[i], requestD[i])
 	}
-
+	//for each decrypted TPOC sum Commit, and Commit received over r value
+	//if both TPOC of user and TPOC of device are verified increase duration value
 	for i := 0; i < len(decryptedU[0].cDec); i++ {
 		var sumDecU, sumReqU, sumDecD, sumReqD ristretto.Point
 		sumDecU.SetZero()
@@ -530,31 +519,6 @@ func constructTokenQueryResponseFromIterator(resultsIterator shim.StateQueryIter
 
 	return tokens, nil
 }
-func decryptTpoc(address, tpoc string) (string, string) {
-	connection, err := net.Dial(SERVER_TYPE, address)
-	if err != nil {
-		panic(err)
-	}
-	//defer connection.Close()
-	//send some data
-	_, err = connection.Write([]byte("decrypt" + REQUEST + tpoc))
-	if err != nil {
-		fmt.Println("Error reading:", err.Error())
-	}
-
-	buffer := make([]byte, 1024)
-	mLen, err := connection.Read(buffer)
-	if err != nil {
-		fmt.Println("Error reading:", err.Error())
-	}
-	//fmt.Println("msg received")
-	defer connection.Close()
-	resp := strings.Split(string(buffer[:mLen]), SPLIT)
-	//fmt.Println("response: ", resp)
-	commitDec := resp[0]
-	commitCHK := resp[1]
-	return commitDec, commitCHK
-}
 func ConcaveScore(duration float64) float64 {
 
 	//calulate concave score according to BRAVE formula
@@ -600,29 +564,6 @@ func receiveCommit(address string) (string, string, string) {
 	//fmt.Println("Commit:", commit)
 	//fmt.Println("Random:", random)
 	return commit, random, key
-}
-func verifyTpoc(tpoc string, addr []string) bool {
-
-	//TPoC has the form of : partial commit + "SPLIT" + partial r values + ... + "KEY" + key value
-	var cDecryptedSum, cToCheckSum ristretto.Point
-	cDecryptedSum.SetZero()
-	cToCheckSum.SetZero()
-	key := strings.Split(tpoc, "KEY")
-	tpocSplit := strings.Split(key[0], SPLIT)
-	j := 1
-	for i := 0; i < len(addr); i++ {
-		cDecStr, cToCheckStr := decryptTpoc(addr[i], tpocSplit[i+j]+SPLIT+tpocSplit[i+j+1]+"KEY"+key[1])
-		cDec, _ := utils.ConvertStringToPoint(cDecStr)
-		cToCheck, _ := utils.ConvertStringToPoint(cToCheckStr)
-		cDecryptedSum.Add(&cDecryptedSum, cDec)
-		cToCheckSum.Add(&cToCheckSum, cToCheck)
-		j += 1
-	}
-	if cDecryptedSum.Equals(&cToCheckSum) {
-		return true
-	} else {
-		return false
-	}
 }
 func generateTpoc(sumC *ristretto.Point, sumR *ristretto.Scalar, n int, secretK *ristretto.Scalar, publicK []string) string {
 	//split commit into n parts
@@ -750,34 +691,6 @@ func decryptRequest(address string, req string) decryptResponse {
 }
 
 //##################################################################################################################################################################################################################################
-//##################################################################################################################################################################################################################################
-//testing function  	---> DELETE THEM AT THE END <---
-func (s *SmartContract) TestCommit() string {
-	var H ristretto.Point
-	var sVal ristretto.Scalar
-	var r1Val ristretto.Scalar
-	var c1Val ristretto.Point
-
-	sVal.Rand()
-	H.Rand()
-
-	c, r := generateCommitment(&H, &sVal)
-	r1Val = *r
-	c1Val = *c
-	fmt.Println("commitment:\n", c1Val)
-	fmt.Println("blinding factor:\n", r1Val)
-
-	comm, rand, k := receiveCommit("verifier.pub.com:9000")
-	fmt.Println(comm, rand, k)
-	return "test"
-}
-func generateCommitment(H *ristretto.Point, s *ristretto.Scalar) (*ristretto.Point, *ristretto.Scalar) {
-	var r ristretto.Scalar
-	r.Rand()
-
-	c := pedersen.CommitTo(H, &r, s)
-	return c, &r
-}
 
 //##################################################################################################################################################################################################################################
 func main() {
