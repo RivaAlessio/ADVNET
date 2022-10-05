@@ -64,11 +64,12 @@ func main() {
 			os.Exit(1)
 		}
 		fmt.Println("client connected")
+		//go processClient(connection)
 		go processRequest(connection)
 	}
 }
 func processRequest(connection net.Conn) {
-	buffer := make([]byte, 1024)
+	buffer := make([]byte, 15625)
 	var s string
 	var response string
 
@@ -87,8 +88,9 @@ func processRequest(connection net.Conn) {
 			fmt.Println(err.Error())
 		}
 	} else if req[0] == "Req_commit" {
-		//generate commitment over r value received
-		defer connection.Close()
+		//r_received, _ := utils.ConvertStringToScalar(req[1])
+		//c_req := pedersen.CommitTo(&H, r_received, &secretVal)
+
 		r_received, _ := utils.ConvertStringToPoint(req[1])
 		c_req := CommitToTest(&H, r_received, &secretVal)
 
@@ -100,32 +102,41 @@ func processRequest(connection net.Conn) {
 	} else if req[0] == "decrypt" {
 
 		fmt.Println("decrypting")
-		reqDec := strings.Split(req[1], "KEY")
-		key, _ := utils.ConvertStringToPoint(reqDec[1])
-		tpoc := strings.Split(reqDec[0], SPLIT)
-		c_Enc, _ := utils.ConvertStringToPoint(tpoc[0])
-		//decrypt commit received
-		c_Dec := elgamal.Decrypt(&sk, key, c_Enc)
-		//convert r value received to point
-		rand, _ := utils.ConvertStringToPoint(tpoc[1])
-		//decrypt r value
-		randDec := elgamal.Decrypt(&sk, key, rand)
-		//generate commit over r value received
-		c_Resp := CommitToTest(&H, randDec, &secretVal)
-		fmt.Println(c_Dec)
-		fmt.Println(c_Resp)
-		//conver commit decrypted and generated to string --> send back
-		c_DecS := utils.ConvertPointToString(c_Dec)
-		c_RespS := utils.ConvertPointToString(c_Resp)
-		response := c_DecS + SPLIT + c_RespS
+		fmt.Println(req[1])
+		// bufferz := make([]byte, 2024)
+		// mLeng, err := connection.Read(bufferz)
+		// if err != nil {
+		// 	fmt.Println("Error reading:", err.Error())
+		// }
+		// fmt.Println("read buffer")
+		// str := string(bufferz[:mLeng])
+		// fmt.Println(str)
+		response := "RESPONSE"
+		reqs := strings.Split(req[1], "TPOC")
+		for i := 0; i < len(reqs)-1; i++ {
+			reqDec := strings.Split(reqs[i], "KEY")
+			key, _ := utils.ConvertStringToPoint(reqDec[1])
+			tpoc := strings.Split(reqDec[0], SPLIT)
+			c_Enc, _ := utils.ConvertStringToPoint(tpoc[0])
+			c_Dec := elgamal.Decrypt(&sk, key, c_Enc)
+			rand, _ := utils.ConvertStringToPoint(tpoc[1])
+			randDec := elgamal.Decrypt(&sk, key, rand)
+			c_Resp := CommitToTest(&H, randDec, &secretVal)
+			c_DecS := utils.ConvertPointToString(c_Dec)
+			c_RespS := utils.ConvertPointToString(c_Resp)
+			response = response + c_DecS + SPLIT + c_RespS + "TPOC"
+
+		}
+
+		//fmt.Println(c_Dec)
+		//fmt.Println(c_Resp)
+		fmt.Println(response)
 		_, err = connection.Write([]byte(response))
 		if err != nil {
 			fmt.Println(err.Error())
 		}
-	} else {
-		connection.Close()
 	}
-
+	defer connection.Close()
 }
 
 func generateCommitment(H *ristretto.Point, s *ristretto.Scalar) (*ristretto.Point, *ristretto.Scalar) {
