@@ -2,6 +2,19 @@
 ## explicit; go 1.13
 github.com/bwesterb/go-ristretto
 github.com/bwesterb/go-ristretto/edwards25519
+# github.com/go-redis/redis v6.15.9+incompatible
+## explicit
+github.com/go-redis/redis
+github.com/go-redis/redis/internal
+github.com/go-redis/redis/internal/consistenthash
+github.com/go-redis/redis/internal/hashtag
+github.com/go-redis/redis/internal/pool
+github.com/go-redis/redis/internal/proto
+github.com/go-redis/redis/internal/util
+# github.com/onsi/ginkgo v1.16.5
+## explicit; go 1.16
+# github.com/onsi/gomega v1.24.1
+## explicit; go 1.18
 # github.com/tuhoag/elliptic-curve-cryptography-go v0.0.4
 ## explicit; go 1.13
 github.com/tuhoag/elliptic-curve-cryptography-go/elgamal

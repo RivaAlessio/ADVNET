@@ -71,10 +71,17 @@ const (
 )
 
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
-
+	verifiers := "verifier.adv.com:9000,verifier.pub.com:9000"
 	campaigns := []Campaign{
 		{ID_Campaign: "001", ID_Advertiser: "adv1", ID_Publisher: "pub1", DocType: "campaign", Verifier: "verifier.adv.com:9000,verifier.pub.com:9000", RewardValue: "0.5", StartingDate: "2022-05-01T00:00:01", EndingDate: "2022-09-01T23:59:59"},
 		{ID_Campaign: "002", ID_Advertiser: "adv2", ID_Publisher: "pub2", DocType: "campaign", Verifier: "verifier.adv.com:9000,verifier.pub.com:9000", RewardValue: "0.8", StartingDate: "2022-07-01T00:00:01", EndingDate: "2022-12-01T23:59:59"},
+	}
+	addr := strings.Split(verifiers, ",")
+	for i := 0; i < len(addr); i++ {
+		initParamTest(addr[i], "001")
+	}
+	for i := 0; i < len(addr); i++ {
+		initParamTest(addr[i], "002")
 	}
 	for _, campaign := range campaigns {
 		assetJSON, err := json.Marshal(campaign)
@@ -143,7 +150,40 @@ func (s *SmartContract) CreateCampaign(ctx contractapi.TransactionContextInterfa
 	if exists {
 		return fmt.Errorf("the campaign %s already exists", id)
 	}
+	addr := strings.Split(verifier, ",")
+	for i := 0; i < len(addr); i++ {
+		initParam(addr[i], id)
+	}
+	campaign := Campaign{
+		ID_Campaign:   id,
+		ID_Advertiser: idadv,
+		ID_Publisher:  idpub,
+		DocType:       doctype,
+		Verifier:      verifier,
+		RewardValue:   reward,
+		StartingDate:  start,
+		EndingDate:    end,
+	}
+	campaignJSON, err := json.Marshal(campaign)
+	if err != nil {
+		return err
+	}
 
+	return ctx.GetStub().PutState(id, campaignJSON)
+}
+func (s *SmartContract) CreateTestCampaign(ctx contractapi.TransactionContextInterface, id string, idadv string, idpub string, doctype string, verifier string, reward string, start string, end string) error {
+
+	exists, err := s.CampaignExists(ctx, id)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return fmt.Errorf("the campaign %s already exists", id)
+	}
+	addr := strings.Split(verifier, ",")
+	for i := 0; i < len(addr); i++ {
+		initParamTest(addr[i], id)
+	}
 	campaign := Campaign{
 		ID_Campaign:   id,
 		ID_Advertiser: idadv,
@@ -687,6 +727,39 @@ func decryptRequest(address string, req string) decryptResponse {
 		//decrypted.cReq[i] = tpoc[1]
 	}
 	return decrypted
+
+}
+func initParam(address string, cID string) {
+	connection, err := net.Dial(SERVER_TYPE, address)
+
+	if err != nil {
+		panic(err)
+	}
+	defer connection.Close()
+	//send some data
+	var H ristretto.Point
+	H.Rand()
+	Hs := utils.ConvertPointToString(&H)
+	_, err = connection.Write([]byte("GenParam" + REQUEST + cID + "CID" + Hs + "HVAL"))
+	if err != nil {
+		fmt.Println("Error reading:", err.Error())
+	}
+
+}
+func initParamTest(address string, cID string) {
+	connection, err := net.Dial(SERVER_TYPE, address)
+
+	if err != nil {
+		panic(err)
+	}
+	defer connection.Close()
+	//send some data
+
+	//yMUdpoU8NCPZiFmpXygUExfNbcEyzvqqr9f8he1f20Q=
+	_, err = connection.Write([]byte("GenParam" + REQUEST + cID + "CID" + "yMUdpoU8NCPZiFmpXygUExfNbcEyzvqqr9f8he1f20Q=" + "HVAL"))
+	if err != nil {
+		fmt.Println("Error reading:", err.Error())
+	}
 
 }
 

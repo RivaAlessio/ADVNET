@@ -32,6 +32,15 @@ services:
         - TESTING=TRUE
         - SECRET=R9oNT1Lg5e3ntdAYvEl0BfHaM4ys0Qwuy/IoEfG05Ag=
         - SECRETKEY=DYMm0G2G3zc25FM6Xxuk07jtd9V3TeV0DE8rYHlgdQU=
+        - REDIS=redis.adv.com:6379
+    redis.adv.com:
+        container_name: redis.adv.com
+        image: redis:latest
+        ports:
+            - 6379:6379
+        command: redis-server
+        networks:
+            - test
 
     verifier.pub.com:
         container_name: verifier.pub.com
@@ -44,6 +53,15 @@ services:
         - TESTING=TRUE
         - SECRET=aoAB2yaCuP2aUg9XXsYNB7FQxFPnglwvfJjx/TLJwgY=
         - SECRETKEY=OR3fLzrrKRmtioBYkEkA1j38L6oinRK4/jROmuwkpAQ=
+        - REDIS=redis.pub.com:6379
+    redis.pub.com:
+        container_name: redis.pub.com
+        image: redis:latest
+        ports:
+            - 6389:6379
+        command: redis-server
+        networks:
+            - test
 
     orderer.advnet.com:
         container_name: orderer.advnet.com
