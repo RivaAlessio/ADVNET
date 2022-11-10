@@ -40,7 +40,7 @@ class ClaimRewardWorkload extends WorkloadModuleBase {
         console.log(`Worker ${this.workerIndex}: Creating asset ${campaignID}`);
         const requestC={
             contractId: this.roundArguments.contractId,
-            contractFunction: 'CreateCampaign',
+            contractFunction: 'CreateTestCampaign',
             invokerIdentity: 'peer0.adv0.advnet.com',
             contractArguments: [campaignID,'advtestID','pubtestID','campaign',verifier,'1','2022-01-01T00:00:01','2022-09-01T23:59:59'],
             readOnly: false
