@@ -89,45 +89,45 @@ class ClaimRewardWorkload extends WorkloadModuleBase {
     }
 
     async cleanupWorkloadModule() {
-        const campaignID=`${this.workerIndex}_Campaign`;
-        console.log(`Worker ${this.workerIndex}: Deleting asset ${campaignID}`);
-        const request = {
-            contractId: this.roundArguments.contractId,
-            contractFunction: 'DeleteCampaign',
-            invokerIdentity: 'peer0.adv0.advnet.com',
-            contractArguments: [campaignID],
-            readOnly: false
-        };
+        // const campaignID=`${this.workerIndex}_Campaign`;
+        // console.log(`Worker ${this.workerIndex}: Deleting asset ${campaignID}`);
+        // const request = {
+        //     contractId: this.roundArguments.contractId,
+        //     contractFunction: 'DeleteCampaign',
+        //     invokerIdentity: 'peer0.adv0.advnet.com',
+        //     contractArguments: [campaignID],
+        //     readOnly: false
+        // };
 
-        await this.sutAdapter.sendRequests(request);
-        console.log('Deleting Tokens')
-        for (let i=0; i<this.roundArguments.assets; i++) {
-            const assetID = file.TPOC[i];
-            console.log(`${i}_Worker ${this.workerIndex}: Deleting asset ${assetID}`);
-            const requestC = {
-                contractId: this.roundArguments.contractId,
-                contractFunction: 'DeleteToken',
-                invokerIdentity: 'peer0.adv0.advnet.com',
-                contractArguments: [assetID],
-                readOnly: false
-            };
+        // await this.sutAdapter.sendRequests(request);
+        // console.log('Deleting Tokens')
+        // for (let i=0; i<this.roundArguments.assets; i++) {
+        //     const assetID = file.TPOC[i];
+        //     console.log(`${i}_Worker ${this.workerIndex}: Deleting asset ${assetID}`);
+        //     const requestC = {
+        //         contractId: this.roundArguments.contractId,
+        //         contractFunction: 'DeleteToken',
+        //         invokerIdentity: 'peer0.adv0.advnet.com',
+        //         contractArguments: [assetID],
+        //         readOnly: false
+        //     };
 
-            await this.sutAdapter.sendRequests(requestC);
-        }
-        console.log(IDs.length)
-        for (let i=0; i<IDs.length; i++) {
-            const assetID = IDs[i];
-            console.log(`${i}: Worker ${this.workerIndex}: Deleting asset ${assetID}`);
-            const requestD = {
-                contractId: this.roundArguments.contractId,
-                contractFunction: 'DeleteReward',
-                invokerIdentity: 'peer0.adv0.advnet.com',
-                contractArguments: [`${this.workerIndex}_Campaign`,assetID],
-                readOnly: false
-            };
+        //     await this.sutAdapter.sendRequests(requestC);
+        // }
+        // console.log(IDs.length)
+        // for (let i=0; i<IDs.length; i++) {
+        //     const assetID = IDs[i];
+        //     console.log(`${i}: Worker ${this.workerIndex}: Deleting asset ${assetID}`);
+        //     const requestD = {
+        //         contractId: this.roundArguments.contractId,
+        //         contractFunction: 'DeleteReward',
+        //         invokerIdentity: 'peer0.adv0.advnet.com',
+        //         contractArguments: [`${this.workerIndex}_Campaign`,assetID],
+        //         readOnly: false
+        //     };
 
-            await this.sutAdapter.sendRequests(requestD);
-        }
+        //     await this.sutAdapter.sendRequests(requestD);
+        // }
 
         IDs=[];
         txN=0;
