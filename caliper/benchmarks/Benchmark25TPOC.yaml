@@ -1,0 +1,60 @@
+test:
+  name: basic test
+  workers:
+    type: local
+    number: 1
+  rounds:
+    - label: ClaimReward (10000txRequests-500Tps) claim 25 TPOCs 
+      txNumber: 10000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 500
+      workload:
+        module: benchmarks/workload/claimReward.js
+        arguments:
+          assets: 50
+          max: 25
+          min: 25
+          tx: 10000
+          contractId: main
+    # - label: GenerateProof (2000Tx-100Tps)
+    #   txNumber: 2000
+    #   rateControl:
+    #     type: fixed-rate
+    #     opts:
+    #       tps: 100
+    #   workload:
+    #     module: benchmarks/workload/generateProof.js
+    #     arguments:
+    #       contractId: main
+    # - label: ReadCampaign (2000Tx-100Tps)
+    #   txNumber: 2000
+    #   rateControl:
+    #     type: fixed-rate
+    #     tps: 100
+    #   workload:
+    #     module: benchmarks/workload/claimReward.js
+    #     arguments:
+    #       assets: 20
+    #       contractId: main
+    # - label: CreateCampaign (2000Tx-100Tps)
+    #   txNumber: 2000
+    #   rateControl:
+    #     type: fixed-rate
+    #     tps: 100
+    #   workload:
+    #     module: benchmarks/workload/claimReward.js
+    #     arguments:
+    #       contractId: main
+    
+    
+
+
+monitor:
+  type:
+  - none
+
+observer:
+  type: local
+  interval: 5

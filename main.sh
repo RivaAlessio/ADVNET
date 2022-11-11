@@ -94,6 +94,38 @@ function initCaliper() {
 function caliperLaunch() {
     $SCRIPTS_DIR/caliper.sh "launch" $CALIPER_VERSION $FABRIC_VERSION $CALIPER_WORKSPACE $CALIPER_NETWORK_CONFIG $CALIPER_BENCH_CONFIG
 }
+function caliperLaunch3tpoc() {
+	local C_CONFIG=$CALIPER_DIR/benchmarks/Benchmark3TPOC.yaml
+    $SCRIPTS_DIR/caliper.sh "launch" $CALIPER_VERSION $FABRIC_VERSION $CALIPER_WORKSPACE $CALIPER_NETWORK_CONFIG $C_CONFIG
+}
+function caliperLaunch7tpoc() {
+	local C_CONFIG=$CALIPER_DIR/benchmarks/Benchmark7TPOC.yaml
+    $SCRIPTS_DIR/caliper.sh "launch" $CALIPER_VERSION $FABRIC_VERSION $CALIPER_WORKSPACE $CALIPER_NETWORK_CONFIG $C_CONFIG
+}
+function caliperLaunch12tpoc() {
+	local C_CONFIG=$CALIPER_DIR/benchmarks/Benchmark12TPOC.yaml
+    $SCRIPTS_DIR/caliper.sh "launch" $CALIPER_VERSION $FABRIC_VERSION $CALIPER_WORKSPACE $CALIPER_NETWORK_CONFIG $C_CONFIG
+}
+function caliperLaunch18tpoc() {
+	local C_CONFIG=$CALIPER_DIR/benchmarks/Benchmark18TPOC.yaml
+    $SCRIPTS_DIR/caliper.sh "launch" $CALIPER_VERSION $FABRIC_VERSION $CALIPER_WORKSPACE $CALIPER_NETWORK_CONFIG $C_CONFIG
+}
+function caliperLaunch25tpoc() {
+	local C_CONFIG=$CALIPER_DIR/benchmarks/Benchmark25TPOC.yaml
+    $SCRIPTS_DIR/caliper.sh "launch" $CALIPER_VERSION $FABRIC_VERSION $CALIPER_WORKSPACE $CALIPER_NETWORK_CONFIG $C_CONFIG
+}
+function caliperLaunch20000tx() {
+	local C_CONFIG=$CALIPER_DIR/benchmarks/Benchmark20000tx.yaml
+    $SCRIPTS_DIR/caliper.sh "launch" $CALIPER_VERSION $FABRIC_VERSION $CALIPER_WORKSPACE $CALIPER_NETWORK_CONFIG $C_CONFIG
+}
+function caliperLaunch35000tx() {
+	local C_CONFIG=$CALIPER_DIR/benchmarks/Benchmark35000tx.yaml
+    $SCRIPTS_DIR/caliper.sh "launch" $CALIPER_VERSION $FABRIC_VERSION $CALIPER_WORKSPACE $CALIPER_NETWORK_CONFIG $C_CONFIG
+}
+function caliperLaunch50000tx() {
+	local C_CONFIG=$CALIPER_DIR/benchmarks/Benchmark50000tx.yaml
+    $SCRIPTS_DIR/caliper.sh "launch" $CALIPER_VERSION $FABRIC_VERSION $CALIPER_WORKSPACE $CALIPER_NETWORK_CONFIG $C_CONFIG
+}
 function testingprotocol(){
 	
 	fcnCall='{"function":"'ClaimReward'","Args":["'001'","'TestId'","'SPLITyqLgA1RXL3S+npfSVXOSYMF5pSfAz7dhZqCYyNhnAVM=SPLITHlGMv1ecFIx7GMAn2vXG9xFUGbBdopa7s8sYOHHKTEY=SPLITBFj2xt4L2+9yVf2VPlSPsmqG+aAJEuC0mNsiV8tq0R0=SPLITRqIYlcqmL/O80Xn4XvNb+fbHLuE/WjELmMr6+M/G1A0=KEYQAMga5l4/JX/CSEVnKAB52LL4erdkUP78iHVqQ0q3zQ=RWRDSPLITPuxpWUVdwrJIMd7Tf/tNwZbp9PHpUJ0ycXx8sYWGrUg=SPLITkovHacagnAAXLwfWxTQDeBw1eJ56N0Tu5bPf9PCjPRc=SPLITiGZWSXH5UlAqaHJPhr5OVQnJUxLvca3KsBtroB5/uGA=SPLIT3q62s8F+cztIW33SQAtotvjURtozzu2qC+TXk3lUJV0=KEYMvfCBn23SX3raSd4yeXMjYIafy8n4CJiUgJL02Pfxm4='","today"]}'
@@ -186,8 +218,22 @@ elif [ $MODE = "caliper" ]; then
     SUB_MODE=$2
     if [ $SUB_MODE = "init" ]; then
         initCaliper
-    elif [ $SUB_MODE = "launch" ]; then
-        caliperLaunch
+    elif [ $SUB_MODE = "launch-3tpoc" ]; then
+        caliperLaunch3tpoc
+	elif [ $SUB_MODE = "launch-7tpoc" ]; then
+        caliperLaunch7tpoc
+	elif [ $SUB_MODE = "launch-12tpoc" ]; then
+        caliperLaunch12tpoc
+	elif [ $SUB_MODE = "launch-18tpoc" ]; then
+        caliperLaunch18tpoc
+	elif [ $SUB_MODE = "launch-25tpoc" ]; then
+        caliperLaunch25tpoc
+	elif [ $SUB_MODE = "launch-20000tx" ]; then
+        caliperLaunch20000tx
+	elif [ $SUB_MODE = "launch-35000tx" ]; then
+        caliperLaunch35000tx
+	elif [ $SUB_MODE = "launch-50000tx" ]; then
+        caliperLaunch50000tx
     elif [ $SUB_MODE = "clear" ]; then
         clearCaliper
     else
