@@ -43,7 +43,7 @@ sudo chmod -R 755 scripts/
 The current setup uses the same crypto parameters for each campaign, in a real implementation each different verifier should adopts different parameters for each campaign :warning: :warning:
 # </br> Hyperledger Caliper Test
 The current system was tested over an Intel processor equipped with 8 cores, 16 Threads. Clock speed running from 3.6 GHz to a maximum boost speed of 5.0 GHz. 16 GB of ram DDR4 3000 MHz.
-* A test result example can be foundd in ./caliper/ folder
+* A test result example can be found in ./caliper/ folder
 
 **Initialize caliper**
 ```
