@@ -11,7 +11,7 @@ test:
         opts:
           tps: 200
       workload:
-        module: benchmarks/workload/createCampaign.js
+        module: benchmarks/workload/addToken.js
         arguments:
           assets: 5
           max: 3
