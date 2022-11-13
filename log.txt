@@ -1,0 +1,1 @@
+[34m2022-11-13 16:44:36.318 CET [chaincodeCmd] chaincodeInvokeOrQuery -> INFO 001[0m Chaincode invoke successful. result: status:200 payload:"{\"ID_User\":\"108388821cae89823e70b2618ed9713721ec27fa3a31ac8923a2aaa4159145e8\",\"ID_Campaign\":\"001\",\"Reward_Amount\":\"1.000000\",\"DocType\":\"reward\",\"Timestamp\":\"today\"}" 
