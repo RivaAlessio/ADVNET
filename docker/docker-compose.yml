@@ -62,6 +62,53 @@ services:
         command: redis-server
         networks:
             - test
+    verifier.3.com:
+        container_name: verifier.3.com
+        build: ./verifier
+        ports:
+            - 9011:9000
+        networks:
+            - test
+        environment:
+        - TESTING=TRUE
+        - SECRET=inJe7DujNCQwgM0CH61fYlq22TPAP4jU0R92abJ2ZQg=
+        - SECRETKEY=TUrNZeNzJU1PunJA9riPT16AY+wjX+JgBr+aXEoiow8=
+
+    verifier.4.com:
+            container_name: verifier.4.com
+            build: ./verifier
+            ports:
+                - 9022:9000
+            networks:
+                - test
+            environment:
+            - TESTING=TRUE
+            - SECRET=FuoSqmcHvOfiYZc5tP6KgJs3zYNlI+F66gNI5ru5TwM=
+            - SECRETKEY=lcrj2bpeh2n1nmIieVUhmC7KZbiGIDcCDY39sw7Ccgs=
+
+    verifier.5.com:
+            container_name: verifier.5.com
+            build: ./verifier
+            ports:
+                - 9028:9000
+            networks:
+                - test
+            environment:
+            - TESTING=TRUE
+            - SECRET=pxs9gu1IngNDnXmh9tRgm/sOB4eYj294qJtRfVvBVAE=
+            - SECRETKEY=BJ4lPdqnRcssgEWv5jz1sUFPLNvpopO0u9nejEA0iwc=
+
+    verifier.6.com:
+            container_name: verifier.6.com
+            build: ./verifier
+            ports:
+                - 9052:9000
+            networks:
+                - test
+            environment:
+            - TESTING=TRUE
+            - SECRET=r9ziwww+gq/d+a3IKCZYwnM0Xnq0vTZf3xxzH/7TXwo=
+            - SECRETKEY=xHNTNlzLcFYKiesHtwKd8/TW3nlet+vIcBgYohFYOwI=
 
     orderer.advnet.com:
         container_name: orderer.advnet.com

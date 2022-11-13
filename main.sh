@@ -161,7 +161,7 @@ if [ $MODE = "network" ]; then
         approveChaincode
         commitChaincode
 		sleep 2
-        invokeChaincodeInit
+        #invokeChaincodeInit
 		#sleep 2
         #queryChaincode
 		echo "---> Network Ready <---"
@@ -207,6 +207,8 @@ elif [ $MODE = "chaincode" ]; then
 	elif [ $SUB_MODE = "queryalltoken" ]; then
         queryAllToken
 	elif [ $SUB_MODE = "testing-protocol" ]; then
+		invokeChaincodeInit
+        sleep 1
 		tokencollection
 		sleep 1
 		testingprotocol
