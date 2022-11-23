@@ -39,6 +39,9 @@ sudo chmod -R 755 scripts/
 ./main.sh network down
 ```
 -->
+
+`/chaincode` directory contains all chaincode functions grouped, in `/cc` directory each function is separated to belong to its chaincode namespace
+
 </br> :warning: :warning:
 The current setup uses the same crypto parameters for each campaign, in a real implementation each different verifier should adopts different parameters for each campaign :warning: :warning:
 # </br> Hyperledger Caliper Test
