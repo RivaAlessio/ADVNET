@@ -12,6 +12,7 @@ function packageChaincode() {
 
     infoln "Vendoring Go dependencies at $CHAINCODE_SRC_PATH"
     pushd $CHAINCODE_SRC_PATH
+	go get -u
     GO111MODULE=on go mod vendor
     popd
     successln "Finished vendoring Go dependencies"
